@@ -1,0 +1,240 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Code styling
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible
+}
+
+% Title Info
+\title{\textbf{Evaluating the Use of Vector Instructions in Prime \& Probe Attacks}}
+\author{
+    Your Name \\
+    Iowa State University \\
+    Course Name \\
+    \texttt{your.email@example.com}
+}
+\date{\today}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+
+\vspace*{1in}
+
+{\Large \textbf{Evaluating the Use of Vector Instructions in Prime \& Probe Attacks}}
+
+\vspace{0.5in}
+
+by
+
+\vspace{0.5in}
+
+{\large James Joseph}
+
+\vfill
+
+A creative component submitted to the graduate faculty\\
+in partial fulfillment of the requirements for the degree of\\
+
+\vspace{0.3in}
+
+\textbf{MASTER OF SCIENCE}
+
+\vspace{0.3in}
+
+Program of Study: Electrical and Computer Engineering [Cyber Security M.S.]
+
+\vspace{1in}
+
+Program of Study Committee:\\
+Berk Gulmezoglu, Major Professor\\
+
+\vfill
+
+\begin{flushleft}
+The student author, whose presentation of the scholarship herein was approved by the program of study committee, is solely responsible for the content of this creative component. The Graduate College will ensure this creative component is globally accessible and will not permit alterations after a degree is conferred.
+\end{flushleft}
+
+\vfill
+
+Iowa State University\\
+Ames, Iowa\\
+2026
+
+\vspace{0.5in}
+
+Copyright © James Joseph, 2026. All rights reserved.
+
+\end{center}
+\end{titlepage}
+
+% Abstract
+\begin{abstract}
+Cache side-channel attacks such as Prime \& Probe remain a significant threat in modern microarchitectures. While prior work primarily focuses on scalar memory accesses, the role of vector (SIMD) instructions in these attacks is not well understood. This paper evaluates how vector instructions (e.g., AVX) influence cache behavior, timing resolution, and the effectiveness of Prime \& Probe attacks. To that aim, multiple PoC programs were created each with different levels of the attack in mind to explore vector instructions, how they interact with memory, and what different cache levels look like. During evaluation, it was found the the vpgather set of instructions can be used to detect memory access from different sets in the L1D cache. During evaluation, there were multiple findings that also lead to difficulties with this reading. First, apparent pipelining leading to subsequent Prime \& Probe iterations on the same or different sets resulting in different timings. Second, micro-op optimization around vector instructions causing worse performance when isolated with lfence. Lastly, noise around scheduling and cache flushing causing major outliers (>1000\% baseline of 100+/-10).
+\end{abstract}
+
+\section{Introduction}
+Cache side-channel attacks exploit shared microarchitectural resources to extract sensitive information. Prime \& Probe is a widely studied technique that infers victim memory access patterns by observing cache eviction behavior.
+
+Most prior work assumes scalar memory accesses. However, modern CPUs heavily utilize vector instructions (e.g., AVX, SSE), which may significantly alter cache interaction patterns.
+
+\textbf{Research Question:}
+\begin{itemize}
+    \item How do vector instructions impact the effectiveness of Prime \& Probe attacks?
+\end{itemize}
+
+\textbf{Contributions:}
+\begin{itemize}
+    \item Implementation of scalar and vectorized Prime \& Probe attacks
+    \item Empirical comparison of timing behavior and noise
+    \item Analysis of microarchitectural effects of SIMD memory accesses
+\end{itemize}
+
+\section{Background}
+
+\subsection{Cache Architecture}
+Modern CPUs employ multi-level cache hierarchies (L1, L2, LLC) with set associativity. Memory addresses map to cache sets, and eviction occurs when sets are overfilled.
+
+\subsection{Prime \& Probe}
+Prime \& Probe consists of three phases:
+\begin{enumerate}
+    \item \textbf{Prime:} Fill cache sets with attacker data
+    \item \textbf{Victim Execution:} Victim accesses memory
+    \item \textbf{Probe:} Measure access time to detect evictions
+\end{enumerate}
+
+\subsection{Vector Instructions}
+Vector instructions (SIMD) operate on multiple data elements simultaneously. Examples include:
+\begin{itemize}
+    \item SSE (128-bit)
+    \item AVX (256-bit)
+    \item AVX-512 (512-bit)
+\end{itemize}
+
+These instructions may:
+\begin{itemize}
+    \item Access multiple cache lines
+    \item Trigger prefetching
+    \item Increase memory-level parallelism
+\end{itemize}
+
+\section{Threat Model}
+We assume an attacker who:
+\begin{itemize}
+    \item Shares the last-level cache with the victim
+    \item Can execute code on the same machine
+    \item Has access to high-resolution timing (e.g., \texttt{rdtsc})
+\end{itemize}
+
+We do not assume physical access or privileged execution.
+
+\section{Methodology}
+
+\subsection{Experimental Setup}
+\begin{itemize}
+    \item CPU: (Specify model)
+    \item Cache sizes: (L1, L2, LLC)
+    \item OS: (e.g., Linux)
+    \item Tools: \texttt{rdtsc}, \texttt{perf}, custom C/C++ code
+\end{itemize}
+
+\subsection{Attack Implementation}
+
+\subsubsection{Scalar Prime \& Probe}
+Baseline implementation using standard memory accesses.
+
+\subsubsection{Vectorized Prime \& Probe}
+Implementation using SIMD instructions:
+\begin{itemize}
+    \item AVX load/store instructions
+    \item Aligned vs unaligned memory accesses
+\end{itemize}
+
+\subsection{Metrics}
+\begin{itemize}
+    \item Timing variance
+    \item Cache eviction rate
+    \item Signal-to-noise ratio
+    \item Detection accuracy
+\end{itemize}
+
+\section{Evaluation}
+
+\subsection{Timing Behavior}
+Compare scalar vs vector access timing distributions.
+
+\subsection{Cache Efficiency}
+Measure how effectively each method fills and evicts cache sets.
+
+\subsection{Attack Accuracy}
+Evaluate the ability to detect victim activity.
+
+\section{Analysis}
+We analyze how vector instructions influence:
+\begin{itemize}
+    \item Cache line utilization
+    \item Prefetching behavior
+    \item Memory-level parallelism
+\end{itemize}
+
+We also discuss tradeoffs between speed, noise, and detectability.
+
+\section{Limitations}
+\begin{itemize}
+    \item Results may be hardware-specific
+    \item Limited instruction sets evaluated
+    \item Noise in timing measurements
+\end{itemize}
+
+\section{Mitigations}
+Potential defenses include:
+\begin{itemize}
+    \item Cache partitioning
+    \item Constant-time programming
+    \item Restricting high-resolution timers
+\end{itemize}
+
+\section{Related Work}
+Discuss prior research on:
+\begin{itemize}
+    \item Prime \& Probe attacks
+    \item Cache side channels
+    \item SIMD/memory behavior
+\end{itemize}
+
+\section{Conclusion}
+We evaluated the role of vector instructions in Prime \& Probe attacks. Our findings highlight how SIMD operations impact cache behavior and side-channel effectiveness, providing insights for both attackers and defenders.
+
+Future work includes exploring AVX-512 and cross-core attack scenarios.
+
+% References
+\begin{thebibliography}{9}
+
+\bibitem{primeprobe}
+O. Aciicmez, W. Schindler, and C. Koc,
+``Improving Brumley and Boneh Timing Attack on Unprotected SSL Implementations,''
+\textit{ACM CCS}, 2005.
+
+\bibitem{flushreload}
+Y. Yarom and K. Falkner,
+``Flush+Reload: A High Resolution, Low Noise, L3 Cache Side-Channel Attack,''
+\textit{USENIX Security}, 2014.
+
+\end{thebibliography}
+
+\end{document}
+
+https://antoonpurnal.github.io/files/pdf/PrimeScope.pdf
