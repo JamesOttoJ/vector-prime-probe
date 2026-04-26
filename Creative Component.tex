@@ -1,13 +1,21 @@
-\documentclass[11pt]{article}
+\documentclass[conference]{IEEEtran}
 
 % Packages
 \usepackage[margin=1in]{geometry}
 \usepackage{times}
-\usepackage{amsmath, amssymb}
+\usepackage{amsmath,amssymb,amsfonts}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{tikz}
+\usepackage{cite}
+\usepackage{algorithmic}
+\usepackage{enumitem}
+\usepackage{float}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 % Code styling
 \lstset{
@@ -16,6 +24,8 @@
     frame=single,
     columns=fullflexible
 }
+
+\graphicspath{ {./images/} }
 
 % Title Info
 \title{\textbf{Evaluating the Use of Vector Instructions in Prime \& Probe Attacks}}
@@ -91,150 +101,568 @@ Cache side-channel attacks exploit shared microarchitectural resources to extrac
 
 Most prior work assumes scalar memory accesses. However, modern CPUs heavily utilize vector instructions (e.g., AVX, SSE), which may significantly alter cache interaction patterns.
 
-\textbf{Research Question:}
-\begin{itemize}
-    \item How do vector instructions impact the effectiveness of Prime \& Probe attacks?
+\noindent\textbf{Research Question:}
+\begin{itemize}[leftmargin=*]
+    \item How do vector instructions impact the effectiveness of Prime \& Probe attacks on L1 cache?
 \end{itemize}
 
-\textbf{Contributions:}
-\begin{itemize}
-    \item Implementation of scalar and vectorized Prime \& Probe attacks
-    \item Empirical comparison of timing behavior and noise
-    \item Analysis of microarchitectural effects of SIMD memory accesses
+\noindent\textbf{Contributions:}
+\begin{itemize}[leftmargin=*]
+    \item Implementation of vectorized Prime \& Probe attacks
+    \item Analysis of timing behavior, noise, and microarchitectural effects of SIMD memory accesses
 \end{itemize}
 
 \section{Background}
 
 \subsection{Cache Architecture}
-Modern CPUs employ multi-level cache hierarchies (L1, L2, LLC) with set associativity. Memory addresses map to cache sets, and eviction occurs when sets are overfilled.
+Modern CPUs employ multi-level cache hierarchies (L1, L2, L3). L1 is the fastest and smallest. It has a separate cache for instructions (L1I) and the data (L1D) those instructions act on. This makes it useful for short loops and commonly references data. L2 is slightly larger and slower. It stores both instructions and data together. Every core has an L1D, L1I, and L2 cache to itself. When a program can't find its instruction or data in the L1 or L2 caches, it falls back to the largest and slowest cache: L3 or Last Level Cache (LLC). L3 is shared across all cores and it the last place to look on the CPU before defaulting to of-chip memory and storage.
+
+Caches are structured with lines and sets. A line is typically 64 bytes, and the caches associativity will determine how many lines are in a set. For example, an 8-way associative cache will have 8 lines per set. When determining where to place a piece of memory that has just been read or written to, the memory address is split up into the tag, set, and offset going from most significant bit to least significant bit. If you have a 32-bit memory address with 64 sets and 64 byte lines, it will be split up as such:
+tag: 00000000000000000000 | set: 000000 | offset: 000000
+This means that every 4096 (0x1000) bytes, the same set will be used. To differentiate which line belongs to which address, the tag is checked against what is stored in the cache.
+
+Once the cache is filled, if a new line needs to get added, it will evict one of the lines currently in that set. While there are multiple methods to determine when a line needs added and which line needs replaced, the CPU used in this paper uses write-back and Least Recently Used (LRU). The write-back cache strategy means that every time a write occurs, the data is written to L1 immediately. Once it gets evicted, it gets written to the next level of cache until it is written to memory and storage. This means every read that relies on the write only has to wait for L1 speed. To determine if the line gets evicted, the LRU strategy is used. As it sounds, this evicts the cache line that was read from or written to least recently.
 
 \subsection{Prime \& Probe}
 Prime \& Probe consists of three phases:
-\begin{enumerate}
+\noindent\begin{enumerate}[leftmargin=*]
     \item \textbf{Prime:} Fill cache sets with attacker data
     \item \textbf{Victim Execution:} Victim accesses memory
     \item \textbf{Probe:} Measure access time to detect evictions
 \end{enumerate}
 
-\subsection{Vector Instructions}
-Vector instructions (SIMD) operate on multiple data elements simultaneously. Examples include:
-\begin{itemize}
-    \item SSE (128-bit)
-    \item AVX (256-bit)
-    \item AVX-512 (512-bit)
-\end{itemize}
+\noindent This exploits the time difference from accessing memory at different cache levels to understand the cache access patterns of different programs. That data can be used to determine which programs are running on the system or even what they are doing depending on how they handle memory access in different states.
 
-These instructions may:
-\begin{itemize}
-    \item Access multiple cache lines
-    \item Trigger prefetching
-    \item Increase memory-level parallelism
-\end{itemize}
+\subsection{Vector Instructions}
+Vector instructions or Single Instruction Multiple Data (SIMD) instructions operate on multiple data elements simultaneously. These often don't come with the standard Instruction set Architecture (ISA) of a chip and need to be added with extensions like MMX, SSE, AVX2, or AVX512 on Intel\textsuperscript{\tiny\textregistered}. As the SIMD acronym suggests, these instructions go beyond the normal data size of an ISA (such as 64 bits for x86\_64) and allow 1 instruction to operate on 128, 256, or even 512 bits at once.
+
+The reason these instructions are being looked at for prime and probe is to evaluate the effect of evicting entire cache sets with one instruction. How does prefetching play a role? Will there be a difference in timing depending on the number of lines evicted? What does the decrease in timing overhead do?
+
+While those benefits may be promising, not all CPUs support all vector instructions (especially the ones employed here). More CPUs are adopting AVX512, but it is still an enthusiast/professional focused market.
 
 \section{Threat Model}
-We assume an attacker who:
-\begin{itemize}
-    \item Shares the last-level cache with the victim
-    \item Can execute code on the same machine
+During this analysis, it is assumed the attacker has:
+\begin{itemize}[leftmargin=*]
+    \item Shares the first-level cache with the victim
+    \item Can execute code on the same core
     \item Has access to high-resolution timing (e.g., \texttt{rdtsc})
 \end{itemize}
 
-We do not assume physical access or privileged execution.
+I do not assume physical access or privileged execution.
 
 \section{Methodology}
 
 \subsection{Experimental Setup}
-\begin{itemize}
-    \item CPU: (Specify model)
-    \item Cache sizes: (L1, L2, LLC)
-    \item OS: (e.g., Linux)
-    \item Tools: \texttt{rdtsc}, \texttt{perf}, custom C/C++ code
+\begin{itemize}[leftmargin=*]
+    \item CPU: Intel\textsuperscript{\tiny\textregistered} Xeon\textsuperscript{\tiny\textregistered} Gold 5218 CPU @ 2.30GHz
+    \item Cache sizes:
+    \begin{itemize}[leftmargin=*]
+        \item L1D:
+        \begin{itemize}[leftmargin=*]
+            \item 32 KiB/core
+            \item 64B line
+            \item 8-way associative
+            \item 64 sets
+        \end{itemize}
+        \item L2:
+        \begin{itemize}[leftmargin=*]
+            \item 1 MiB/core
+            \item 64B line
+            \item 16-way associative
+            \item 1024 sets
+        \end{itemize}
+    \end{itemize}
+    \item OS: Linux
+    \item Tools: \texttt{rdtsc}, \texttt{vpgather}, \texttt{perf}, custom C/asm code
 \end{itemize}
+
+Along with these items, it is worth noting that no stock hardware settings were modified in the experiments. Settings such as isolcpus, prefetch disable, ASLR disable, and other settings that would reduce noise were not used to evaluate the effectiveness on deployed configurations.
 
 \subsection{Attack Implementation}
 
 \subsubsection{Scalar Prime \& Probe}
-Baseline implementation using standard memory accesses.
+The scalar Prime \& Probe program this project used as a baseline was created by Debopriya Roy Dipta. It uses a pointer chase technique for memory access and uses a function that evicts one cache line to evaluate timing differences. This produces a pronounced difference in the experimental timing compared to the baseline.
 
 \subsubsection{Vectorized Prime \& Probe}
-Implementation using SIMD instructions:
-\begin{itemize}
-    \item AVX load/store instructions
-    \item Aligned vs unaligned memory accesses
+During the project, multiple PoCs were developed:
+\begin{itemize}[leftmargin=*]
+    \item avx\_cache\_fill\_with\_time.asm
+    \begin{itemize}[leftmargin=*]
+        \item Consistently calls and times \texttt{vpgatherqq} on 8 addresses 0x1000 bytes apart while logging anomalies (> 30 cycles)
+    \end{itemize}
+    \item avx\_cache\_fill\_with\_time\_avx2.asm
+    \begin{itemize}[leftmargin=*]
+        \item Modification of \emph{avx\_cache\_fill\_with\_time.asm} to use AVX2 \texttt{vpgatherdd}
+    \end{itemize}
+    \item ping\_memory.c
+    \begin{itemize}[leftmargin=*]
+        \item Spins off a process that accesses memory every set time while running \emph{avx\_cache\_fill\_with\_time.asm}
+    \end{itemize}
+    \item Prime-Probe.c
+    \begin{itemize}[leftmargin=*]
+        \item Modification of Dipta's scalar Prime \& Probe program to use vector instructions and enable a variety of tests
+    \end{itemize}
 \end{itemize}
 
-\subsection{Metrics}
-\begin{itemize}
-    \item Timing variance
-    \item Cache eviction rate
-    \item Signal-to-noise ratio
-    \item Detection accuracy
+As mentioned in the description of some PoCs, the \texttt{vpgather} family of instructions was chosen to perform simultaneous memory accesses. \texttt{vpgather} takes in a base memory address, list of offsets, scale (1, 2, 4, or 8), mask, and list of fallback values. Every \texttt{vpgather} instruction is followed by two letters (i.e. \texttt{vpgatherdq}). The first letter represents the size of each integer packed into the offsets argument. The second letter marks the size of data to read from memory. A d is for 32 bits while a q means 64-bits. The aforementioned \texttt{vpgatherdq} instruction reads a series of 32-bit integers from the offsets vector and reads a 64-bit integer from the address it resolves to. The instruction takes that information and follows this logic flow according to Intel\textsuperscript{\tiny\textregistered}\cite{intrinsics}
+
+\begin{lstlisting}[language=Python]
+for j = 0 to register_len/data_size:
+    i = j*data_size
+    m = j*data_size
+    if mask[j]
+        addr = base_addr + offsets[m:m+(data_size-1)] * ZeroExtend64(scale) * 8
+        dst[i:i+(data_size-1)] = MEM[addr:addr+(data_size-1)]
+    else:
+        dst[i:i+(data_size-1)] = fallback[i:i+(data_size-1)]
+\end{lstlisting}
+
+For the purposes of Prime \& Probe on the chip that was used, \texttt{vpgatherqq} (512) and \texttt{vpgatherdd} (512/256) work best. \texttt{vpgatherqq} uses 8 64-bit offsets to read 8 64-bit integers from memory when 512-bit registers are used. This fills each cache line in L1D because it is 8-way associative (has 8 lines per set). However, not all common CPUs have support for AVX512. This is where \texttt{vpgatherdd} with 256-bit registers in AVX2 can be useful. It reads 8 32-bit numbers from memory and fills most L1D caches. With 512-bit registers, it reads 16 32-bit integers and fills the L2 cache. This could be useful for evaluating the L3 cache as well as evaluating the influence of instructions based on the unified nature of the L2 cache.
+
+\subsection{Tuned Variables}\label{sec:tuned-variables}
+To explore the different ways vector instructions affect the Prime \& Probe attack, there were multiple knobs and dials turned between runs. This changes how impactful different underlying CPU optimizations were to the timings, and while several different variables were considered and trialed, the most impactful/interesting ones were found to be:
+\begin{itemize}[leftmargin=*]
+    \item Parallel vs. serial timing
+    \item Fencing vs. pipelining timings
+    \item Timing window
+    \item Payload
 \end{itemize}
 
-\section{Evaluation}
+\subsubsection{Parallel vs. Serial Timing}
+The initial Prime \& probe program would run a baseline prime -\> probe with a following prime -\> victim -\> probe. Because the victim function simply accessed a line in the set multiple times, this ensured it was finished before the probe timing was done. For a more complex program, however, this combines all evictions into one measurement and doesn't give the granularity or insight desired.
 
-\subsection{Timing Behavior}
-Compare scalar vs vector access timing distributions.
+A parallel version starts by doing multiple rounds of priming before splitting the program into two processes or threads where one continuously probes the memory and another runs the victim function/program. This allows the attacker to watch the cache state change in real time and evaluate cache access patterns. An example of where this can be useful is determining if differences in timing with the victim function are from outlier/spikes or a chronic increase in the access timings.
 
-\subsection{Cache Efficiency}
-Measure how effectively each method fills and evicts cache sets.
+\subsubsection{Fencing vs. Pipelining Timings}
+Traditional Prime \& Probe techniques say to do primes and probes the following way:
+\begin{lstlisting}[language={[x86masm]Assembler}, caption=Fenced rdtsc example]
+mfence
+lfence
+rdtsc
+lfence
+; access memory
+mfence
+lfence
+rdtsc
+lfence
+\end{lstlisting}
 
-\subsection{Attack Accuracy}
-Evaluate the ability to detect victim activity.
+\texttt{mfence} will ensure that all memory stores are globally visible while \texttt{lfence} ensures that all memory loads are globally visible. Ideally, this ensures that the only memory loads being measured are from the instruction itself, and that any stores/loads that would evict one of the cache lines would already be committed to memory.
 
-\section{Analysis}
-We analyze how vector instructions influence:
-\begin{itemize}
-    \item Cache line utilization
-    \item Prefetching behavior
-    \item Memory-level parallelism
+During testing, however, this was providing cycle times far above the expected latency\footnote{Latency is the number of cycles it should take for the instruction to make it from one end of the pipeline to the other}. Initially this was suspected to be because of compiler optimization issues, but converting the probe function to assembly only reduced the baseline cycle measurements from \textasciitilde130 to \textasciitilde120 in spite of notable differences in the assembly itself.
+
+\begin{lstlisting}[language={[x86masm]Assembler}, caption=Compiled C probe asm]
+MFENCE
+NOP
+LFENCE
+NOP
+RDTSC
+SHL        RDX ,0x20
+OR         RAX ,RDX
+MOV        qword ptr [RSP  + local_198 ],RAX
+LFENCE
+NOP
+MOV        RAX ,qword ptr [RSP  + local_1a0 ]
+VMOVDQA64  ZMM0 ,zmmword ptr [RSP  + local_100[0] ]
+VMOVDQA64  ZMM1 ,zmmword ptr [RSP  + local_140[0] ]
+MOV        EDX ,0xffffffff
+KMOVW      K1,EDX
+VPGATHERQQ ZMM0 {K1},qword ptr [RAX  + RCX *0x1 ]
+VMOVDQA64  zmmword ptr [RSP  + local_180[0] ],ZMM0
+MFENCE
+NOP
+LFENCE
+NOP
+RDTSC
+SHL        RDX ,0x20
+OR         RAX ,RDX
+MOV        qword ptr [RSP  + local_190 ],RAX
+LFENCE
+\end{lstlisting}\footnote{Sourced from Ghidra}
+
+\begin{lstlisting}[language={[x86masm]Assembler}, caption=Custom\, inline probe asm]
+MFENCE
+LFENCE
+RDTSC
+LFENCE
+SHL        RDX ,0x20
+OR         RAX ,RDX
+VPGATHERQQ ZMM1 {K1},qword ptr [RCX  + RAX *0x1 ] ; Decoded improperly. RAX -> ZMM0
+MOV        RSI ,RAX
+MFENCE
+LFENCE
+RDTSC
+LFENCE
+\end{lstlisting}\footnote{Sourced from Ghidra}
+
+While the custom assembly still has overhead with instructions between the timings, none of the instructions access memory, and all of them are simple and efficient. The C version, on the other hand, Has multiple instructions that pull data from memory. While each of these instructions have a low latency (\textasciitilde1 cycle), the access time is expected to be much larger due to the time it takes to reference even L1 cache. Not being able to see as large of a gap is evidence that there may be microarchitectural requirements for the instruction that lines up similarly to the instructions from the C version after all the instructions have been pipelined. For this reason, both the fenced rdtsc (fencing) and unfenced rdtsc (pipelining) were evaluated to understand how the processor's predictions and pipelining impacts the readings.
+
+\subsubsection{Timing Window}
+The window is a technique sometimes used with parallel Prime \& Probe timing to give the program room to breathe and evict more cache sets to get readings from L2 and L3 caches. This is done by adding a nanosleep timer between probes. 
+
+\subsubsection{Payload}
+During testing, multiple payloads were used, but 4 became the most representative of different cases that would show readable patterns in the data:
+\begin{itemize}[leftmargin=*]
+    \item Nothing
+    \begin{itemize}[leftmargin=*]
+        \item Run nothing to get a baseline for the experimentation code
+    \end{itemize}
+    \item Original victim function
+    \begin{itemize}[leftmargin=*]
+        \item serial: Access one line in the set to analyze isolated impact
+        \item parallel: Access one line in the set every x nanoseconds to see spikes
+    \end{itemize}
+    \item pwd command
+    \begin{itemize}[leftmargin=*]
+        \item Shows how a real, small program adds patterns and noise for data
+        \item Takes about the same time as 1000 samples in parallel
+    \end{itemize}
+    \item phoronix pass/fail
+    \begin{itemize}[leftmargin=*]
+        \item Use real benchmarking software to see how samples reacted
+    \end{itemize}
 \end{itemize}
 
-We also discuss tradeoffs between speed, noise, and detectability.
+\section{Experimentation}
+While several tests were run over the course this project, the following provided the most insight into the impact of vector instructions. Each experiment will be named after the variables it implemented from \ref{sec:tuned-variables}. Each of these experiments were run without any mitigating factors in the hardware configuration (isolcpus, disable prefetch, disable ASLR, etc.). All mitigating factors to eliminate noise and reveal patterns in the data were done on a software level.
+
+Note: Rare, very large outliers were identified during testing. They would have very large cycle times (>1,000) and happen inconsistently a few times every 100 runs. They have been omitted for data clarity as no common pattern was identified between them.
+
+\subsection{Serial, Fenced, Victim} %21
+Starting with the serial probing, properly fenced timing, and one line eviction victim, there was definitely a delta across all the stats, but it was small. There also originally appeared to be a difference in set times, but that ended up not persisting across runs. This is one example of the measurements for each set.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{SFV-1}
+    \caption{Box and whisker for all sets}
+    \label{fig:SFV-1}
+\end{figure}
+
+From the output of the program the summary gave the following values:
+
+\begin{lstlisting}
+Run Number = 0
+Target_Set = 0
+Trials     = 1000
+
+A) PRIME -> PROBE              : 128 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 138 cycles (avg)
+Delta (B - A)                  : 10 cycles
+--------------------
+
+Run Number = 0
+Target_Set = 1
+Trials     = 1000
+
+A) PRIME -> PROBE              : 129 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 131 cycles (avg)
+Delta (B - A)                  : 2 cycles
+--------------------
+
+Run Number = 0
+Target_Set = 2
+Trials     = 1000
+
+A) PRIME -> PROBE              : 124 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 132 cycles (avg)
+Delta (B - A)                  : 8 cycles
+--------------------
+
+Run Number = 0
+Target_Set = 3
+Trials     = 1000
+
+A) PRIME -> PROBE              : 123 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 133 cycles (avg)
+Delta (B - A)                  : 10 cycles
+--------------------
+\end{lstlisting}
+
+While only the first 4 sets are provided, this pattern persisted across all 64 sets ranging from 2 to 23 cycles and averaging around 14 cycles across all sets.
+
+\subsection{Serial, Pipelined, Victim} %22
+The main take away from this experiment was that the cycles greatly decreased, but the trends stayed the same. The baseline moved from 125 cycles to 60 cycles, and there was a similar 10\% average delta between the baseline and the experiment across all sets
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{SPV-1}
+    \caption{Serial, Pipelined, Victim trial for all sets}
+    \label{fig:SPV-1}
+\end{figure}
+
+\begin{lstlisting}
+Run Number = 0
+Target_Set = 0
+Trials     = 1000
+
+A) PRIME -> PROBE              : 60 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 65 cycles (avg)
+Delta (B - A)                  : 5 cycles
+--------------------
+
+Run Number = 0
+Target_Set = 1
+Trials     = 1000
+
+A) PRIME -> PROBE              : 61 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 64 cycles (avg)
+Delta (B - A)                  : 3 cycles
+--------------------
+
+Run Number = 0
+Target_Set = 2
+Trials     = 1000
+
+A) PRIME -> PROBE              : 60 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 65 cycles (avg)
+Delta (B - A)                  : 5 cycles
+--------------------
+
+Run Number = 0
+Target_Set = 3
+Trials     = 1000
+
+A) PRIME -> PROBE              : 61 cycles (avg)
+B) PRIME -> VICTIM -> PROBE    : 66 cycles (avg)
+Delta (B - A)                  : 5 cycles
+--------------------
+\end{lstlisting}
+
+\subsection{Parallel, Fenced, None, No Window} %23
+With the introduction of parallel probing, clearer patterns emerge. There are two main types of graphs across all the sets: two consistent lines and one baseline with jumping parallel lines
+
+%Consistent lines
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN0-1}
+    \caption{Scatter plot showing two distinct lines}
+    \label{fig:PFN0-1}
+\end{figure}
+
+The outliers common in this graph and many other experiment's graphs are discussed further in the \ref{sec:analysis} section, but the main point for this graph is the two consistent lines. Outside of the outliers there are two parallel lines. These lines are consistent across many other graphs. While the baseline may change slightly the roughly 10 cycle gap between them stays the same. This is an indication that there may be cache eviction with the lower line representing L1 and the upper line representing L2.
+
+%Single run
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN0-2}
+    \caption{Scatter plot for a single run}
+    \label{fig:PFN0-2}
+\end{figure}
+
+This graph represents a single run to show the consistency of each line along with isolating the aforementioned outliers.
+
+%Fencing
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN0-3}
+    \caption{Scatter plot showing baseline with parallel lines around spikes}
+    \label{fig:PFN0-3}
+\end{figure}
+
+In this graph, there are 3 clear lines with the parallel lines starting up around the outliers and pillars. This is interesting because it shows that there may be a different storage medium aside from L1D and L2, or the lines before were actually L2 and L3. These parallel lines also start and stop around the outliers, so that may be an indication of processes starting up on the same core or some other process underlying the system.
+
+\subsection{Parallel, Fenced, Victim, No Window} %24
+Sadly, each program that was run simultaneously did not have much impact on the data as expected. These show examples of the similar data patterns with the victim program evicting a set every 10,000ns
+
+% Set 0
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFV0-1}
+    \caption{Scatter plot showing consistent set 0 results}
+    \label{fig:PFV0-1}
+\end{figure}
+
+% Individual
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFV0-2}
+    \caption{Scatter plot showing similar individual pattern}
+    \label{fig:PFV0-2}
+\end{figure}
+
+% Lower baseline
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFV0-3}
+    \caption{Scatter plot showing similar parallel lines with baseline}
+    \label{fig:PFV0-3}
+\end{figure}
+
+\subsection{Parallel, Fenced, pwd, No Window} %25
+As with the victim function, pwd and Phoronix gave much the same story in spite of being louder. This is an example of the baseline with the parallel lines while pwd is running.
+
+% Low baseline
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFP0-1}
+    \caption{Scatter plot showing the same lower baseline pattern}
+    \label{fig:PFP0-1}
+\end{figure}
+
+\subsection{Parallel, Pipelined, None, No Window} %26
+When switching to a pipeline approach for the timing, the same patterns go away. This is definitely showing some form of memory optimization that is clearing the effects of other programs using the same sets. It is also noteworthy that the consistent cloud sits around the 60 cycle mark as that changes later.
+
+% Cloud
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PPN0-1}
+    \caption{Scatter plot showing cloud around 60 cycles}
+    \label{fig:PPN0-1}
+\end{figure}
+
+\subsection{Parallel, Fenced, None, 1ns Window} %27
+When adding a 1ns window between the parallel probes with proper fences around the timings, the data simply ends up noisier and with a higher baseline (around 160 cycles). This may indicate that further caches are being used, but the similar patterns make it hard to tell if it should be L2/L3, L3/memory cache, or further. It is worth noting that the spikes are barely visible depending on the plot. This acts as a water line to ensure that it wasn't an overall change in the overhead of the measurements.
+
+Note: when evaluating these graphs, the x axis has increased 2 orders of magnitude from 1,000,000 (1e6) cycles to 100,000,000 (1e8) cycles
+
+% Messy lines
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN1-1}
+    \caption{Scatter plot showing messy lines}
+    \label{fig:PFN1-1}
+\end{figure}
+
+% Different line levels
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN1-2}
+    \caption{Scatter plot showing lines at different levels}
+    \label{fig:PFN1-2}
+\end{figure}
+
+% Spikes
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN1-2}
+    \caption{Scatter plot showing spikes above the lines}
+    \label{fig:PFN1-2}
+\end{figure}
+
+When looking at the spikes in this graph, the appear to be taller and further apart compared to the previous ones. 11, 14, 22, 25, 27, and 48 were the only sets that showed any amount of spikes. Most just ended up in the noise, and even the rest of that group has very small spikes in comparison to 25.
+
+\subsection{Parallel, Pipelined, None, 1ns Window} %28
+The pipelined timing version offers an interesting difference with the window. The original cloud around 6 cycles moves to a more consistent line around 26 cycles (the expected latency of the instruction) with a few stragglers still creating a sparse cloud around 60 cycles.
+
+% Baseline w/ cloud
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PPN1-1}
+    \caption{Scatter plot showing 15 cycle baseline with 60 cycle cloud}
+    \label{fig:PPN1-1}
+\end{figure}
+
+This isn't true for all sets, however. Some sets had much more sparse or no clouds. Notably: 26-30
+
+% Baseline w/o cloud
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PPN1-2}
+    \caption{Scatter plot showing 15 cycle baseline without 60 cycle cloud}
+    \label{fig:PPN1-2}
+\end{figure}
+
+\subsection{Parallel, Fenced, None, 100ns Window} %29
+When increasing the window to 100ns for the fenced timing, much of the same pattern remains, but a cloud around 200 cycles starts to form on some sets.
+
+% One line
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN100-1}
+    \caption{Scatter plot showing one line}
+    \label{fig:PFN100-1}
+\end{figure}
+
+% Two line
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN100-2}
+    \caption{Scatter plot showing similar parallel lines}
+    \label{fig:PFN100-2}
+\end{figure}
+
+% Two line w/ cloud
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PFN100-3}
+    \caption{Scatter plot showing two lines with cloud}
+    \label{fig:PFN100-3}
+\end{figure}
+
+\subsection{Parallel, Pipelined, None, 100ns Window} %30
+As with the fenced version, the pipelined version has very similar clouds to its 1ns counterpart, but more pronounced in some sets.
+
+% Baseline w/ cloud
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PPN100-1}
+    \caption{Scatter plot showing 25 cycle baselne with more pronounced cloud}
+    \label{fig:PPN100-1}
+\end{figure}
+
+% Baseline w/o cloud
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{PPN100-2}
+    \caption{Scatter plot showing 25 cycle baselne without clouds}
+    \label{fig:PPN100-2}
+\end{figure}
+
+\section{Analysis}\label{sec:analysis}
+Each of the variables except the payload had a significant impact on the data. While the end-goal is to identify programs through cache timings, the findings from this project act as a jumping point for further research that uses techniques to reduce noise. This means evaluating the usefulness and impact of each variable and what effects it had on the data independently. In addition, it's worth noting the patterns identified across the datasets and what that may indicate for future data as covered in \ref{sec:patterns}
+
+\subsection{Effectiveness of Parallel Probing}
+While the Serial measurements did provide evidence that vector instructions can detect evicted sets in the cache, it is clear that parallel probing is the way forward. Parallel probing showed various patterns that enabled additional insights into the possible patterns of cache access and impacts of CPU procedures on the average times. That is the reason most of the provided experiments involved the parallel probing technique. Patterns identified in the timing data directed further experimentation where theories around how those patterns may change could be confirmed. Patterns that were identified will be expanded upon in other tests.
+
+\subsection{Pipelining Impact on Instruction Timing}
+To start, the standard timing with proper fencing around \texttt{rdtsc} produces results around the 110-140 cycle range. This is far from the the predicted latency of 26 cycles for \texttt{vpgatherqq}\cite{intrinsics}. On the other hand, letting the timing and gather get pipelined together produces values around either 25 or 60. While this appears to be more accurate or closer to timing the exact instruction timing, further testing showed that pipelining also made patterns that appeared with properly fenced timing disappear. This means that focusing on the proper timing is likely the most useful technique, but more evaluation is needed on what microcode operations happen in the background to slow down the fenced instruction.
+
+\subsection{Window}
+The window technique appears to have provided the expected results: an increase overall in timings and larger jumps outside of outliers. It did also increase the baseline measurements by roughly 50 cycles in each parallel, fenced run. This was unexpected, but the relative measurements from that baseline kept the same pattern seen across the other parallel, fenced runs discussed below. Outside of that, increasing the window also appeared to increase the number of measurements that ended up at those higher levels as expected.
+
+An important note on the window time itself, the total cycle time for both the 1ns and 100ns windows was around 100,000,000 cycles (up from 1,000,000 without it). With a 2-3 GHz processor, it is expected that only 2-3 cycles passes per nanosecond. This should add an extra 2-3 cycles per measurement for the 1ns window (not including interupt overhead) and 200-300 cycles per measurement with the 100ns window. With 1,000 measurements per run, this should not add an extra 99,000,000 cycles or 99,000 cycles per measurement. There must have been some process that takes advantage of the sleep and holds the interrupt for some time. Larger windows should be tested to determine when they take effect.
+
+\subsection{Patterns Across Experiments}\label{sec:patterns}
+While the series experiments were able to show that vector instructions had promise and some use, there weren't any additional patterns in the data, and any apparent patterns across sets did not stand up to a second run of the program. With that in mind, many other variables tended to obscure or modify the underlying patterns in a predictable way already covered above. This section is focusing on the patterns identified in the parallel, fenced runs.
+
+To start, there are a few key outliers. The first outliers are the first two measurements. These tend to be 3.5x and 1.5x the typical cycle time in the data. This is expected to be the prefetcher warming up to get the data. There is a necessary setup period for the experiment after the baseline is taken, and this likely clears the training the baseline does. The second class of outliers happens roughly every 175,000 cycles, and it appears to be 1.5x the baseline. This is likely related to the scheduler as there are other clear behavior changes around these marks. Because the difference is also close to the level of the second sample, it is hard to tell if the cache or the prefetcher is causing the difference. The final class of "outlier" is very similar to the second, but the cycle difference is much smaller at 1.1x-1.2x. This means it often hides among the other readings, but it has similar behavior and implications to the second outlier.
+
+The rest of the data appeared to coalesce around 3 distinct levels that were each roughly 10 cycles apart. There was the baseline, and there were the two levels that would always occur in parallel. The baseline is likely some form of prefetch/prediction cache. On the other hand, the parallel lines likely come from a program reading from memory and processing between reads. This gives time for the Prime \& Probe program to re-fill and recheck the timing before the next read. The inconsistency forces the program to read from L1D instead of a pre-prepared cache and slows the read slightly. This theory stems from the fact that the parallel lines always start and end at timing spikes such as the second and third outlier.
+
+Finally, it's worth noting that there was a consistent lack of notable data in the sets right below 16 and 32 with set 0 having the most consistent show of patterns. This is likely because the addressing for the L1D cache takes fewer bytes then are affected by ASLR, so aligned, larger data structures will consistently use lower sets. For example, a program allocates 1KiB of data aligned to 1KiB. That data either starts in set 0, 16, 32, or 48, and any unused data would likely be around set 15, 31, 47, or 63. This was most noticeable in the 100ns window.
 
 \section{Limitations}
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
     \item Results may be hardware-specific
     \item Limited instruction sets evaluated
     \item Noise in timing measurements
+        \item Scheduler
+        \item Program overhead
+        \item Cache management
+    \item CPU predictions
+        \item Prefetching
+        \item Branch prediction
 \end{itemize}
+As with all Prime \& Probe attacks, every CPU acts differently, and even the same CPU with different microcode can behave differently. This means that these results are specific to the Intel\textsuperscript{\tiny\textregistered} Xeon\textsuperscript{\tiny\textregistered} Gold 5218 CPU @ 2.30GHz mentioned above and may not replicate to other AVX512 enabled chips. On top of that, this exploration was focused on the AVX512 and AVX2 ISA extensions for x86\_64 processors. There are multiple other vector instructions that to vectorized memory read such as ARMs \texttt{LD1SB} or RISC-Vs \texttt{vluxei}.
 
-\section{Mitigations}
-Potential defenses include:
-\begin{itemize}
-    \item Cache partitioning
-    \item Constant-time programming
-    \item Restricting high-resolution timers
-\end{itemize}
+The most apparent source of noise was the scheduler. It was clear that cache lines were getting evicted even without a program expected to be running on the same core. While this did show that the program can identify different states in the cache, it trampled the noise from the payload and made it difficult to understand what effect known access patterns would have. This can be turned off using the \texttt{isolcpus} flag at boot to prevent the scheduler from using certain cores.
 
-\section{Related Work}
-Discuss prior research on:
-\begin{itemize}
-    \item Prime \& Probe attacks
-    \item Cache side channels
-    \item SIMD/memory behavior
-\end{itemize}
+As for the data itself, there was clearly a lot of noise due to the processor's techniques used to speed up instructions and memory access. Prefetching appeared to be reducing the timing floor and typical access time. During other trials, branch prediction was changing the average cycle time for subsequent calls to the Prime \& Probe function. Some of these optimizations like the prefetcher can be turned off in hardware, but this should be done with caution and the understanding that it will likely cause the system to slow.
+
+On top of the CPUs built-in behavior, an inherent part of collecting data in a program is that there needs to be some from of I/O. That can be to STDOUT, a file, or a location in memory, but the tracking need to use memory, and that can add noise and overhead. Further evaluation is needed for the best data collection technique.
 
 \section{Conclusion}
-We evaluated the role of vector instructions in Prime \& Probe attacks. Our findings highlight how SIMD operations impact cache behavior and side-channel effectiveness, providing insights for both attackers and defenders.
+While vector instructions sound like a promising direction for Prime \& Probe attacks, there are many limitations. The use of one instruction makes it more prone to CPU optimizations, and gathering all of the memory at once can obscure individual set evictions. Even with this, there is still promise due to the speed and efficiency of each probe. This provides fewer cycles between measurements and more possible insight into how a program behaves.
 
-Future work includes exploring AVX-512 and cross-core attack scenarios.
+Future work should focus on reducing noise by turning off hardware optimizations and getting a better understanding of cache access behavior through more granular performance monitors.
 
 % References
 \begin{thebibliography}{9}
 
-\bibitem{primeprobe}
-O. Aciicmez, W. Schindler, and C. Koc,
-``Improving Brumley and Boneh Timing Attack on Unprotected SSL Implementations,''
-\textit{ACM CCS}, 2005.
-
-\bibitem{flushreload}
-Y. Yarom and K. Falkner,
-``Flush+Reload: A High Resolution, Low Noise, L3 Cache Side-Channel Attack,''
-\textit{USENIX Security}, 2014.
+\bibitem{intrinsics}
+[1]
+“Intel\textsuperscript{\tiny\textregistered} Intrinsics Guide,” \textit{Intel}, 2024. https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html\#text=vpgatherqq\&ig\_expand=4543 (accessed Apr. 26, 2026).
 
 \end{thebibliography}
 
 \end{document}
-
-https://antoonpurnal.github.io/files/pdf/PrimeScope.pdf

@@ -1,8 +1,8 @@
 ; nasm -f elf64 avx_cache_fill_with_time.asm
 ; gcc -no-pie -o avx_cache_fill_with_time avx_cache_fill_with_time.o
-SECTION .data
+SECTION .data 
 align   64
-array_vindex    dq  0x0, 0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000, 0x7000
+array_vindex    dq  0x0, 0x1000, 0x2000, 0x3000, 0x4000, 0x5000, 0x6000, 0x7000 ; tag: ...000-...111, set: 000000, offset:000000
 fmt             dd  '%d %ld', 10, 0
 nl              dd  10
 out_file        dd  'intel_avx512_out.txt', 0
@@ -59,7 +59,7 @@ loop_main:
     sub rdx, [rbp-10h]
 
     ; Save space by only writing anomalies
-    cmp rdx, 212
+    cmp rdx, 30
     jle inc
 
     ; rdx is already holding the time difference
