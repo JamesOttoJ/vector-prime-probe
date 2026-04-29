@@ -1,0 +1,250 @@
+@misc{intrinsics,
+author = {Intel\textsuperscript{\tiny\textregistered}},
+title = {Intel\textsuperscript{\tiny\textregistered} Intrinsics Guide},
+howpublished={\url{https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=vpgatherqq&ig_expand=4543}}
+}
+
+@misc{ia-cores,
+author = {Intel\textsuperscript{\tiny\textregistered}},
+title = {12th Generation Intel\textsuperscript{\tiny\textregistered} Core\textsuperscript{\tiny\texttrademark} Processors Datasheet, Volume 1 of 2},
+howpublished={\url{https://edc.intel.com/content/www/us/en/design/ipla/software-development-platforms/client/platforms/alder-lake-desktop/12th-generation-intel-core-processors-datasheet-volume-1-of-2/001/ia-cores-level-1-and-level-2-caches/}}
+} 
+
+@inproceedings{10.1145/3460120.3484816,
+author = {Purnal, Antoon and Turan, Furkan and Verbauwhede, Ingrid},
+title = {Prime+Scope: Overcoming the Observer Effect for High-Precision Cache Contention Attacks},
+year = {2021},
+isbn = {9781450384544},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3460120.3484816},
+doi = {10.1145/3460120.3484816},
+abstract = {Modern processors expose software to information leakage through shared microarchitectural state. One of the most severe leakage channels is cache contention, exploited by attacks referred to as PRIME+PROBE, which can infer fine-grained memory access patterns while placing only limited assumptions on attacker capabilities.In this work, we strengthen the cache contention channel with a near-optimal time resolution. We propose PRIME+SCOPE, a cross-core cache contention attack that performs back-to-back cache contention measurements that access only a single cache line. It offers a time resolution of around 70 cycles (25ns), while maintaining the wide applicability of PRIME+PROBE. To enable such a rapid measurement, we rely on the deterministic nature of modern replacement policies and their (non-)interaction across cache levels. We provide a methodology to, essentially, prepare multiple cache levels simultaneously, and apply it to Intel processors with both inclusive and non-inclusive cache hierarchies. We characterize the resolution of PRIME+SCOPE, and confirm it with a cross-core covert channel (capacity up to 3.5 Mbps, no shared memory) and an improved attack on AES T-tables. Finally, we use the properties underlying PRIME+SCOPE to bootstrap the construction of the eviction sets needed for the attack. The resulting routine outperforms state-of-the-art techniques by two orders of magnitude.Ultimately, our work shows that interference through cache contention can provide richer temporal precision than state-of-the-art attacks that directly interact with monitored memory addresses.},
+booktitle = {Proceedings of the 2021 ACM SIGSAC Conference on Computer and Communications Security},
+pages = {2906–2920},
+numpages = {15},
+keywords = {cache attacks, cache side channels, microarchitecture},
+location = {Virtual Event, Republic of Korea},
+series = {CCS '21}
+}
+
+@INPROCEEDINGS{7363305,
+  author={Younis, Younis A. and Kifayat, Kashif and Shi, Qi and Askwith, Bob},
+  booktitle={2015 IEEE International Conference on Computer and Information Technology; Ubiquitous Computing and Communications; Dependable, Autonomic and Secure Computing; Pervasive Intelligence and Computing}, 
+  title={A New Prime and Probe Cache Side-Channel Attack for Cloud Computing}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={1718-1724},
+  keywords={Cloud computing;Hardware;Virtual machining;Encryption;Probes;cloud computing;security;challenges;side channel attacks;cache side-channel attacks;Prime and Probe attack},
+  doi={10.1109/CIT/IUCC/DASC/PICOM.2015.259}
+}
+
+@inproceedings{10.1145/3316781.3317877,
+author = {Wang, Daimeng and Qian, Zhiyun and Abu-Ghazaleh, Nael and Krishnamurthy, Srikanth V.},
+title = {PAPP: Prefetcher-Aware Prime and Probe Side-channel Attack},
+year = {2019},
+isbn = {9781450367257},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3316781.3317877},
+doi = {10.1145/3316781.3317877},
+abstract = {CPU memory prefetchers can substantially interfere with prime and probe cache side-channel attacks, especially on in-order CPUs which use aggressive prefetching. This interference is not accounted for in previous attacks. In this paper, we propose PAPP, a Prefetcher-Aware Prime Probe attack that can operate even in the presence of aggressive prefetchers. Specifically, we reverse engineer the prefetcher and replacement policy on several CPUs and use these insights to design a prime and probe attack that minimizes the impact of the prefetcher. We evaluate PAPP using Cache Side-channel Vulnerability (CSV) metric and demonstrate the substantial improvements in the quality of the channel under different conditions.},
+booktitle = {Proceedings of the 56th Annual Design Automation Conference 2019},
+articleno = {62},
+numpages = {6},
+keywords = {Prime and probe, Prefetching, CPU cache},
+location = {Las Vegas, NV, USA},
+series = {DAC '19}
+}
+
+@INPROCEEDINGS{7163050,
+  author={Liu, Fangfei and Yarom, Yuval and Ge, Qian and Heiser, Gernot and Lee, Ruby B.},
+  booktitle={2015 IEEE Symposium on Security and Privacy}, 
+  title={Last-Level Cache Side-Channel Attacks are Practical}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={605-622},
+  keywords={Probes;Indexes;Multicore processing;Monitoring;Cryptography;Virtual machine monitors;Memory management;side-channel attack;cross-VM side channel;covert channel;last-level cache;ElGamal},
+  doi={10.1109/SP.2015.43}
+}
+  
+@inproceedings{10.1145/3240765.3240844,
+author = {Sabbagh, Majid and Fei, Yunsi and Wahl, Thomas and Ding, A. Adam},
+title = {SCADET: a side-channel attack detection tool for tracking prime+probe},
+year = {2018},
+isbn = {9781450359504},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3240765.3240844},
+doi = {10.1145/3240765.3240844},
+abstract = {Microarchitectural side-channel attacks have posed serious threats to many computing systems, ranging from embedded systems and mobile devices to desktop workstations and cloud servers. Such attacks exploit side-channel vulnerabilities stemming from fundamental microarchitectural performance features, including the most common caches, out-of-order execution (for the newly revealed Meltdown exploit), and speculative execution (for Spectre). Prior efforts have focused on identifying and assessing these security vulnerabilities, and designing and implementing countermeasures against them. However, the efforts aiming at detecting specific side-channel attacks tend to be narrowly focused, which can make them effective but also makes them obsolete very quickly. In this paper, we propose a new methodology for detecting microarchitectural side-channel attacks that has the potential for a wide scope of applicability, as we demonstrate using a case study involving the Prime+Probe attack family. Instead of looking at the side-effects of side-channel attacks on microarchitectural elements such as hardware performance counters, we target the high-level semantics and invariant patterns of these attacks. We have applied our method to different Prime+Probe attack variants on the instruction cache, data cache, and last-level cache, as well as several benign programs as benchmarks. The method can detect all of the Prime+Probe attack variants with a true positive rate of 100\% and an average false positive rate of 7.4\%.},
+booktitle = {Proceedings of the International Conference on Computer-Aided Design},
+articleno = {107},
+numpages = {8},
+keywords = {PIN tool address analysis, prime+probe, side-channel analysis},
+location = {San Diego, California},
+series = {ICCAD '18}
+}
+
+@inproceedings{10.1145/3321705.3329804,
+author = {Gulmezoglu, Berk and Zankl, Andreas and Tol, M. Caner and Islam, Saad and Eisenbarth, Thomas and Sunar, Berk},
+title = {Undermining User Privacy on Mobile Devices Using AI},
+year = {2019},
+isbn = {9781450367523},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3321705.3329804},
+doi = {10.1145/3321705.3329804},
+abstract = {Over the past years, literature has shown that attacks exploiting the microarchitecture of modern processors pose a serious threat to user privacy. This is because applications leave distinct footprints in the processor, which malware can use to infer user activities. In this work, we show that these inference attacks can greatly be enhanced with advanced AI techniques. In particular, we focus on profiling the activity in the last-level cache (LLC) of ARM processors. We employ a simple Prime+Probe based monitoring technique to obtain cache traces, which we classify with deep learning methods including convolutional neural networks. We demonstrate our approach on an off-the-shelf Android phone by launching a successful attack from an unprivileged, zero-permission app in well under a minute. The app detects running applications, opened websites, and streaming videos with up to 98\% accuracy and a profiling phase of at most 6 seconds. This is possible, as deep learning compensates measurement disturbances stemming from the inherently noisy LLC monitoring and unfavorable cache characteristics. In summary, our results show that thanks to advanced AI techniques, inference attacks are becoming alarmingly easy to execute in practice. This once more calls for countermeasures that confine microarchitectural leakage and protect mobile phone applications, especially those valuing the privacy of their users.},
+booktitle = {Proceedings of the 2019 ACM Asia Conference on Computer and Communications Security},
+pages = {214–227},
+numpages = {14},
+keywords = {user privacy, mobile device, microarchitecture, machine learning, cache attack, artificial intelligence, arm, activity inference},
+location = {Auckland, New Zealand},
+series = {Asia CCS '19}
+}
+
+@ARTICLE{7447807,
+  author={Gulmezoglu, Berk and İnci, Mehmet Sinan and Irazoqui, Gorka and Eisenbarth, Thomas and Sunar, Berk},
+  journal={IEEE Transactions on Multi-Scale Computing Systems}, 
+  title={Cross-VM Cache Attacks on AES}, 
+  year={2016},
+  volume={2},
+  number={3},
+  pages={211-222},
+  keywords={Cloud computing;Probes;Encryption;Servers;Program processors;Virtual machine monitors;Cross-VM Side-channel attacks;cache attacks;memory de-duplication;prime+probe;flush&reload},
+  doi={10.1109/TMSCS.2016.2550438}
+}
+
+@InProceedings{10.1007/978-3-662-53140-2_18,
+author="{\.{I}}nci, Mehmet Sinan
+and Gulmezoglu, Berk
+and Irazoqui, Gorka
+and Eisenbarth, Thomas
+and Sunar, Berk",
+editor="Gierlichs, Benedikt
+and Poschmann, Axel Y.",
+title="Cache Attacks Enable Bulk Key Recovery on the Cloud",
+booktitle="Cryptographic Hardware and Embedded Systems -- CHES 2016",
+year="2016",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="368--388",
+abstract="Cloud services keep gaining popularity despite the security concerns. While non-sensitive data is easily trusted to cloud, security critical data and applications are not. The main concern with the cloud is the shared resources like the CPU, memory and even the network adapter that provide subtle side-channels to malicious parties. We argue that these side-channels indeed leak fine grained, sensitive information and enable key recovery attacks on the cloud. Even further, as a quick scan in one of the Amazon EC2 regions shows, high percentage -- 55 {\%} -- of users run outdated, leakage prone libraries leaving them vulnerable to mass surveillance.",
+isbn="978-3-662-53140-2"
+}
+
+@inproceedings {236344,
+author = {Mario Werner and Thomas Unterluggauer and Lukas Giner and Michael Schwarz and Daniel Gruss and Stefan Mangard},
+title = {{ScatterCache}: Thwarting Cache Attacks via Cache Set Randomization},
+booktitle = {28th USENIX Security Symposium (USENIX Security 19)},
+year = {2019},
+isbn = {978-1-939133-06-9},
+address = {Santa Clara, CA},
+pages = {675--692},
+url = {https://www.usenix.org/conference/usenixsecurity19/presentation/werner},
+publisher = {USENIX Association},
+month = aug
+}
+
+@inproceedings{10.1145/3319535.3339809,
+author = {Gruss, Daniel and Kraft, Erik and Tiwari, Trishita and Schwarz, Michael and Trachtenberg, Ari and Hennessey, Jason and Ionescu, Alex and Fogh, Anders},
+title = {Page Cache Attacks},
+year = {2019},
+isbn = {9781450367479},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3319535.3339809},
+doi = {10.1145/3319535.3339809},
+abstract = {We present a new side-channel attack that targets one of the most fundamental software caches in modern computer systems: the operating system page cache. The page cache is a pure software cache that contains all disk-backed pages, including program binaries, shared libraries, and other files. On Windows, dynamic pages are also part of this cache and can be attacked as well, e.g., data, heap, and stacks. Our side channel permits unprivileged monitoring of accesses to these pages of other processes, with a spatial resolution of 4kB and a temporal resolution of 2µs on Linux (≤6.7 measurements per second), and 466ns on Windows 10 (≤223 measurements per second). We systematically analyze the side channel by demonstrating different hardware-agnostic local attacks, including a sandbox-bypassing high-speed covert channel, an ASLR break on Windows 10, and various information leakages that can be used for targeted extortion, spam campaigns, and more directly for UI redressing attacks. We also show that, as with hardware cache attacks, we can attack the generation of temporary passwords on vulnerable cryptographic implementations. Our hardware-agnostic attacks can be mitigated with our proposed security patches, but the basic side channel remains exploitable via timing measurements. We demonstrate this with a remote covert channel exfiltrating information from a colluding process through innocuous server requests.},
+booktitle = {Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security},
+pages = {167–180},
+numpages = {14},
+keywords = {cache attacks, operating systems, software-based attacks},
+location = {London, United Kingdom},
+series = {CCS '19}
+}
+
+@InProceedings{10.1007/978-3-319-21476-4_8,
+author="G{\"u}lmezo{\u{g}}lu, Berk
+and {\.{I}}nci, Mehmet Sinan
+and Irazoqui, Gorka
+and Eisenbarth, Thomas
+and Sunar, Berk",
+editor="Mangard, Stefan
+and Poschmann, Axel Y.",
+title="A Faster and More Realistic Flush+Reload Attack on AES",
+booktitle="Constructive Side-Channel Analysis and Secure Design",
+year="2015",
+publisher="Springer International Publishing",
+address="Cham",
+pages="111--126",
+abstract="Cloud's unrivaled cost effectiveness and on the fly operation versatility is attractive to enterprise and personal users. However, the cloud inherits a dangerous behavior from virtualization systems that poses a serious security risk: resource sharing. This work exploits a shared resource optimization technique called memory deduplication to mount a powerful known-ciphertext only cache side-channel attack on a popular OpenSSL implementation of AES. In contrast to the other cross-VM cache attacks, our attack does not require synchronization with the target server and is fully asynchronous, working in a more realistic scenario with much weaker assumption. Also, our attack succeeds in just 15 seconds working across cores in the cross-VM setting. Our results show that there is strong information leakage through cache in virtualized systems and the memory deduplication should be approached with caution.",
+isbn="978-3-319-21476-4"
+}
+
+@article{Kaur2021,
+  author = {Kaur, Jaspinder and Das, Shirshendu},
+  title = {A Survey on Cache Timing Channel Attacks for Multicore Processors},
+  journal = {Journal of Hardware and Systems Security},
+  year = {2021},
+  volume = {5},
+  number = {2},
+  pages = {169--189},
+  doi = {10.1007/s41635-021-00115-3},
+  url = {https://doi.org/10.1007/s41635-021-00115-3},
+  abstract = {Cache timing channel attacks has attained a lot of attention in the last decade. These attacks exploits the timing channel created by the significant time gap between cache and main memory accesses. It has been successfully implemented to leak the secret key of various cryptography algorithms. The latest advancements in cache attacks also exploit other micro-architectural components such as hardware prefetchers, branch predictor, and replacement engine, in addition to the cache memory. Detection of these attacks is a difficult task as the attacker process running in the processor must be detected before significant portion of the attack is complete. The major challenge for mitigation and defense mechanisms against these attacks is maintaining the system performance while disabling or avoiding these attacks. The overhead caused by detection, mitigation and defense mechanism must not be significant to system’s performance. This paper discusses the research carried out in three aspects of cache security: cache timing channel attacks, detection techniques of these attacks, and defense mechanisms in details.}
+}
+
+@inproceedings{10.1145/3658644.3690241,
+author = {Liu, Zhibo and Yuan, Yuanyuan and Chen, Yanzuo and Hu, Sihang and Li, Tianxiang and Wang, Shuai},
+title = {DeepCache: Revisiting Cache Side-Channel Attacks in Deep Neural Networks Executables},
+year = {2024},
+isbn = {9798400706363},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3658644.3690241},
+doi = {10.1145/3658644.3690241},
+abstract = {Deep neural networks (DNN) are increasingly deployed in heterogeneous hardware, including high-performance devices like GPUs and low-power devices like mobile/IoT CPUs, FPGAs, and accelerators. In order to unlock the full performance potential of various hardware, deep learning (DL) compilers automatically optimize DNN inference computations and compile DNN models into DNN executables for efficient computations across hardware backends. As valuable intellectual properties, DNN architectures are one primary attack target. Since previous works already demonstrate the abuse of cache side channels to steal DNN architectures from DL frameworks (e.g., PyTorch and TensorFlow), we first study using those known side-channel attacks against DNN executables. We find that attacking DNN executables presents unique challenges, and existing works can hardly apply. Particularly, DNN executables exhibit a standalone paradigm that largely reduces cache side channel attack surfaces. Meanwhile, cache side channels capture only limited behaviors of the whole DNN execution while facing daunting technical challenges (e.g., noise and low time resolution). However, we unveil a unique attack vector in DNN executables, such that the cache-aware optimizations, which are extensively employed by contemporary DL compilers to harvest the full potentials of hardware, would result in distinguishable DNN operator cache access patterns, making model architecture recovery possible. We propose DeepCache, an end-to-end side channel attack framework, to infer DNN model architectures from DNN executables. DeepCache  leverages cache side channels as the attacking primitives and combines contrastive learning and anomaly detection to enable precise inference. Our evaluation using the standard Prime+Probe shows that DeepCache  yields a high accuracy in exploiting complex DNN executables under both the basic L1 cache attack and the more practical but challenging last level cache (LLC) attack settings.},
+booktitle = {Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security},
+pages = {4495–4508},
+numpages = {14},
+keywords = {cache side channel, dnn executable, dnn stealing},
+location = {Salt Lake City, UT, USA},
+series = {CCS '24}
+}
+
+@article{10.1145/3645109,
+author = {Zhang, Jiliang and Chen, Congcong and Cui, Jinhua and Li, Keqin},
+title = {Timing Side-channel Attacks and Countermeasures in CPU Microarchitectures},
+year = {2024},
+issue_date = {July 2024},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {56},
+number = {7},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/3645109},
+doi = {10.1145/3645109},
+abstract = {Microarchitectural vulnerabilities, such as Meltdown and Spectre, exploit subtle microarchitecture state to steal the user’s secret data and even compromise the operating systems. In recent years, considerable discussion lies in understanding the attack-defense mechanisms and exploitability of such vulnerabilities. Unfortunately, there have been few investigations into a systematic elaboration of threat models, attack scenarios and requirements, and defense targets of the resulting attacks. In this article, we fill this gap and make the following contributions. We first propose two sets of taxonomies for classifying microarchitectural timing side-channel attacks and their countermeasures according to various attack conditions. Based on the taxonomies proposed, we then review published attacks and existing defenses and systematically analyze their internals. In particular, we also provide a comprehensive analysis of the similarities and differences among those attacks, uncovering the corresponding practicality and severity by identifying the attack targets/platforms and the security boundaries that can be bypassed to reveal information. We further examine the scalability of those defenses through specifying expected defense goals and costs. We also discuss corresponding detection methods based on different classifications. Finally, we propose several key challenges of existing countermeasures and the attack trends, and discuss directions for future research.},
+journal = {ACM Comput. Surv.},
+month = apr,
+articleno = {178},
+numpages = {40},
+keywords = {Microarchitecture, timing side-channel attacks, transient execution, side-channel countermeasures}
+}
+
+@inproceedings {184415,
+author = {Yuval Yarom and Katrina Falkner},
+title = {{FLUSH+RELOAD}: A High Resolution, Low Noise, L3 Cache {Side-Channel} Attack},
+booktitle = {23rd USENIX Security Symposium (USENIX Security 14)},
+year = {2014},
+isbn = {978-1-931971-15-7},
+address = {San Diego, CA},
+pages = {719--732},
+url = {https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/yarom},
+publisher = {USENIX Association},
+month = aug
+}

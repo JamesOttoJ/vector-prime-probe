@@ -1,0 +1,78 @@
+@inproceedings{10.1145/3460120.3484816,
+author = {Purnal, Antoon and Turan, Furkan and Verbauwhede, Ingrid},
+title = {Prime+Scope: Overcoming the Observer Effect for High-Precision Cache Contention Attacks},
+year = {2021},
+isbn = {9781450384544},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3460120.3484816},
+doi = {10.1145/3460120.3484816},
+abstract = {Modern processors expose software to information leakage through shared microarchitectural state. One of the most severe leakage channels is cache contention, exploited by attacks referred to as PRIME+PROBE, which can infer fine-grained memory access patterns while placing only limited assumptions on attacker capabilities.In this work, we strengthen the cache contention channel with a near-optimal time resolution. We propose PRIME+SCOPE, a cross-core cache contention attack that performs back-to-back cache contention measurements that access only a single cache line. It offers a time resolution of around 70 cycles (25ns), while maintaining the wide applicability of PRIME+PROBE. To enable such a rapid measurement, we rely on the deterministic nature of modern replacement policies and their (non-)interaction across cache levels. We provide a methodology to, essentially, prepare multiple cache levels simultaneously, and apply it to Intel processors with both inclusive and non-inclusive cache hierarchies. We characterize the resolution of PRIME+SCOPE, and confirm it with a cross-core covert channel (capacity up to 3.5 Mbps, no shared memory) and an improved attack on AES T-tables. Finally, we use the properties underlying PRIME+SCOPE to bootstrap the construction of the eviction sets needed for the attack. The resulting routine outperforms state-of-the-art techniques by two orders of magnitude.Ultimately, our work shows that interference through cache contention can provide richer temporal precision than state-of-the-art attacks that directly interact with monitored memory addresses.},
+booktitle = {Proceedings of the 2021 ACM SIGSAC Conference on Computer and Communications Security},
+pages = {2906–2920},
+numpages = {15},
+keywords = {cache attacks, cache side channels, microarchitecture},
+location = {Virtual Event, Republic of Korea},
+series = {CCS '21}
+}
+
+@INPROCEEDINGS{7363305,
+  author={Younis, Younis A. and Kifayat, Kashif and Shi, Qi and Askwith, Bob},
+  booktitle={2015 IEEE International Conference on Computer and Information Technology; Ubiquitous Computing and Communications; Dependable, Autonomic and Secure Computing; Pervasive Intelligence and Computing}, 
+  title={A New Prime and Probe Cache Side-Channel Attack for Cloud Computing}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={1718-1724},
+  keywords={Cloud computing;Hardware;Virtual machining;Encryption;Probes;cloud computing;security;challenges;side channel attacks;cache side-channel attacks;Prime and Probe attack},
+  doi={10.1109/CIT/IUCC/DASC/PICOM.2015.259}
+}
+
+@inproceedings{10.1145/3316781.3317877,
+author = {Wang, Daimeng and Qian, Zhiyun and Abu-Ghazaleh, Nael and Krishnamurthy, Srikanth V.},
+title = {PAPP: Prefetcher-Aware Prime and Probe Side-channel Attack},
+year = {2019},
+isbn = {9781450367257},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3316781.3317877},
+doi = {10.1145/3316781.3317877},
+abstract = {CPU memory prefetchers can substantially interfere with prime and probe cache side-channel attacks, especially on in-order CPUs which use aggressive prefetching. This interference is not accounted for in previous attacks. In this paper, we propose PAPP, a Prefetcher-Aware Prime Probe attack that can operate even in the presence of aggressive prefetchers. Specifically, we reverse engineer the prefetcher and replacement policy on several CPUs and use these insights to design a prime and probe attack that minimizes the impact of the prefetcher. We evaluate PAPP using Cache Side-channel Vulnerability (CSV) metric and demonstrate the substantial improvements in the quality of the channel under different conditions.},
+booktitle = {Proceedings of the 56th Annual Design Automation Conference 2019},
+articleno = {62},
+numpages = {6},
+keywords = {Prime and probe, Prefetching, CPU cache},
+location = {Las Vegas, NV, USA},
+series = {DAC '19}
+}
+
+@INPROCEEDINGS{7163050,
+  author={Liu, Fangfei and Yarom, Yuval and Ge, Qian and Heiser, Gernot and Lee, Ruby B.},
+  booktitle={2015 IEEE Symposium on Security and Privacy}, 
+  title={Last-Level Cache Side-Channel Attacks are Practical}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={605-622},
+  keywords={Probes;Indexes;Multicore processing;Monitoring;Cryptography;Virtual machine monitors;Memory management;side-channel attack;cross-VM side channel;covert channel;last-level cache;ElGamal},
+  doi={10.1109/SP.2015.43}
+}
+  
+@inproceedings{10.1145/3240765.3240844,
+author = {Sabbagh, Majid and Fei, Yunsi and Wahl, Thomas and Ding, A. Adam},
+title = {SCADET: a side-channel attack detection tool for tracking prime+probe},
+year = {2018},
+isbn = {9781450359504},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3240765.3240844},
+doi = {10.1145/3240765.3240844},
+abstract = {Microarchitectural side-channel attacks have posed serious threats to many computing systems, ranging from embedded systems and mobile devices to desktop workstations and cloud servers. Such attacks exploit side-channel vulnerabilities stemming from fundamental microarchitectural performance features, including the most common caches, out-of-order execution (for the newly revealed Meltdown exploit), and speculative execution (for Spectre). Prior efforts have focused on identifying and assessing these security vulnerabilities, and designing and implementing countermeasures against them. However, the efforts aiming at detecting specific side-channel attacks tend to be narrowly focused, which can make them effective but also makes them obsolete very quickly. In this paper, we propose a new methodology for detecting microarchitectural side-channel attacks that has the potential for a wide scope of applicability, as we demonstrate using a case study involving the Prime+Probe attack family. Instead of looking at the side-effects of side-channel attacks on microarchitectural elements such as hardware performance counters, we target the high-level semantics and invariant patterns of these attacks. We have applied our method to different Prime+Probe attack variants on the instruction cache, data cache, and last-level cache, as well as several benign programs as benchmarks. The method can detect all of the Prime+Probe attack variants with a true positive rate of 100\% and an average false positive rate of 7.4\%.},
+booktitle = {Proceedings of the International Conference on Computer-Aided Design},
+articleno = {107},
+numpages = {8},
+keywords = {PIN tool address analysis, prime+probe, side-channel analysis},
+location = {San Diego, California},
+series = {ICCAD '18}
+}
+

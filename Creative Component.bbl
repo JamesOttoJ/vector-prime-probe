@@ -1,0 +1,100 @@
+\begin{thebibliography}{10}
+
+\bibitem{10.1145/3460120.3484816}
+A.~Purnal, F.~Turan, and I.~Verbauwhede, ``Prime+scope: Overcoming the observer
+  effect for high-precision cache contention attacks,'' in {\em Proceedings of
+  the 2021 ACM SIGSAC Conference on Computer and Communications Security}, CCS
+  '21, (New York, NY, USA), p.~2906–2920, Association for Computing
+  Machinery, 2021.
+
+\bibitem{7447807}
+B.~Gulmezoglu, M.~S. İnci, G.~Irazoqui, T.~Eisenbarth, and B.~Sunar,
+  ``Cross-vm cache attacks on aes,'' {\em IEEE Transactions on Multi-Scale
+  Computing Systems}, vol.~2, no.~3, pp.~211--222, 2016.
+
+\bibitem{10.1007/978-3-662-53140-2_18}
+M.~S. {\.{I}}nci, B.~Gulmezoglu, G.~Irazoqui, T.~Eisenbarth, and B.~Sunar,
+  ``Cache attacks enable bulk key recovery on the cloud,'' in {\em
+  Cryptographic Hardware and Embedded Systems -- CHES 2016} (B.~Gierlichs and
+  A.~Y. Poschmann, eds.), (Berlin, Heidelberg), pp.~368--388, Springer Berlin
+  Heidelberg, 2016.
+
+\bibitem{7363305}
+Y.~A. Younis, K.~Kifayat, Q.~Shi, and B.~Askwith, ``A new prime and probe cache
+  side-channel attack for cloud computing,'' in {\em 2015 IEEE International
+  Conference on Computer and Information Technology; Ubiquitous Computing and
+  Communications; Dependable, Autonomic and Secure Computing; Pervasive
+  Intelligence and Computing}, pp.~1718--1724, 2015.
+
+\bibitem{10.1145/3321705.3329804}
+B.~Gulmezoglu, A.~Zankl, M.~C. Tol, S.~Islam, T.~Eisenbarth, and B.~Sunar,
+  ``Undermining user privacy on mobile devices using ai,'' in {\em Proceedings
+  of the 2019 ACM Asia Conference on Computer and Communications Security},
+  Asia CCS '19, (New York, NY, USA), p.~214–227, Association for Computing
+  Machinery, 2019.
+
+\bibitem{7163050}
+F.~Liu, Y.~Yarom, Q.~Ge, G.~Heiser, and R.~B. Lee, ``Last-level cache
+  side-channel attacks are practical,'' in {\em 2015 IEEE Symposium on Security
+  and Privacy}, pp.~605--622, 2015.
+
+\bibitem{Kaur2021}
+J.~Kaur and S.~Das, ``A survey on cache timing channel attacks for multicore
+  processors,'' {\em Journal of Hardware and Systems Security}, vol.~5, no.~2,
+  pp.~169--189, 2021.
+
+\bibitem{184415}
+Y.~Yarom and K.~Falkner, ``{FLUSH+RELOAD}: A high resolution, low noise, l3
+  cache {Side-Channel} attack,'' in {\em 23rd USENIX Security Symposium (USENIX
+  Security 14)}, (San Diego, CA), pp.~719--732, USENIX Association, Aug. 2014.
+
+\bibitem{10.1007/978-3-319-21476-4_8}
+B.~G{\"u}lmezo{\u{g}}lu, M.~S. {\.{I}}nci, G.~Irazoqui, T.~Eisenbarth, and
+  B.~Sunar, ``A faster and more realistic flush+reload attack on aes,'' in {\em
+  Constructive Side-Channel Analysis and Secure Design} (S.~Mangard and A.~Y.
+  Poschmann, eds.), (Cham), pp.~111--126, Springer International Publishing,
+  2015.
+
+\bibitem{10.1145/3645109}
+J.~Zhang, C.~Chen, J.~Cui, and K.~Li, ``Timing side-channel attacks and
+  countermeasures in cpu microarchitectures,'' {\em ACM Comput. Surv.},
+  vol.~56, Apr. 2024.
+
+\bibitem{10.1145/3316781.3317877}
+D.~Wang, Z.~Qian, N.~Abu-Ghazaleh, and S.~V. Krishnamurthy, ``Papp:
+  Prefetcher-aware prime and probe side-channel attack,'' in {\em Proceedings
+  of the 56th Annual Design Automation Conference 2019}, DAC '19, (New York,
+  NY, USA), Association for Computing Machinery, 2019.
+
+\bibitem{10.1145/3658644.3690241}
+Z.~Liu, Y.~Yuan, Y.~Chen, S.~Hu, T.~Li, and S.~Wang, ``Deepcache: Revisiting
+  cache side-channel attacks in deep neural networks executables,'' in {\em
+  Proceedings of the 2024 on ACM SIGSAC Conference on Computer and
+  Communications Security}, CCS '24, (New York, NY, USA), p.~4495–4508,
+  Association for Computing Machinery, 2024.
+
+\bibitem{236344}
+M.~Werner, T.~Unterluggauer, L.~Giner, M.~Schwarz, D.~Gruss, and S.~Mangard,
+  ``{ScatterCache}: Thwarting cache attacks via cache set randomization,'' in
+  {\em 28th USENIX Security Symposium (USENIX Security 19)}, (Santa Clara, CA),
+  pp.~675--692, USENIX Association, Aug. 2019.
+
+\bibitem{10.1145/3240765.3240844}
+M.~Sabbagh, Y.~Fei, T.~Wahl, and A.~A. Ding, ``Scadet: a side-channel attack
+  detection tool for tracking prime+probe,'' in {\em Proceedings of the
+  International Conference on Computer-Aided Design}, ICCAD '18, (New York, NY,
+  USA), Association for Computing Machinery, 2018.
+
+\bibitem{ia-cores}
+Intel\textsuperscript{\tiny\textregistered}, ``12th generation
+  intel\textsuperscript{\tiny\textregistered}
+  core\textsuperscript{\tiny\texttrademark} processors datasheet, volume 1 of
+  2.''
+  \url{https://edc.intel.com/content/www/us/en/design/ipla/software-development-platforms/client/platforms/alder-lake-desktop/12th-generation-intel-core-processors-datasheet-volume-1-of-2/001/ia-cores-level-1-and-level-2-caches/}.
+
+\bibitem{intrinsics}
+Intel\textsuperscript{\tiny\textregistered},
+  ``Intel\textsuperscript{\tiny\textregistered} intrinsics guide.''
+  \url{https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=vpgatherqq&ig_expand=4543}.
+
+\end{thebibliography}
