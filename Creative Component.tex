@@ -1,3 +1,7 @@
+\DocumentMetadata{
+     lang = en-US,
+     tagging=on
+}
 \documentclass[article]{IEEEtran}
 
 % Packages
@@ -16,6 +20,12 @@
 \usepackage{float}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+    
+\hypersetup{
+    pdftitle={Evaluating the use of vector instructions in Prime+Probe attacks},
+    pdfauthor={James Joseph},
+    pdfdisplaydoctitle={true}
+}
 
 % Code styling
 \lstset{
@@ -31,12 +41,11 @@
 \pagestyle{plain}
 
 % Title Info
-\title{\textbf{Evaluating the Use of Vector Instructions in Prime+Probe Attacks}}
+\title{\textbf{Evaluating the use of vector instructions in Prime+Probe attacks}}
 \author{
-    Your Name \\
+    James Joseph \\
     Iowa State University \\
-    Course Name \\
-    \texttt{your.email@example.com}
+    \texttt{jojoseph@iastate.edu}
 }
 \date{\today}
 
@@ -50,7 +59,7 @@
 
 \vspace*{1in}
 
-{\Large \textbf{Evaluating the Use of Vector Instructions in Prime+Probe Attacks}}
+{\Large \textbf{Evaluating the use of vector instructions in Prime+Probe attacks}}
 
 \vspace{0.5in}
 
@@ -71,18 +80,16 @@ in partial fulfillment of the requirements for the degree of\\
 
 \vspace{0.3in}
 
-Program of Study: Electrical and Computer Engineering [Cyber Security M.S.]
+Major: Cyber Security
 
 \vspace{1in}
 
-Program of Study Committee:\\
+Academic Plan Committee:\\
 Berk Gulmezoglu, Major Professor\\
 
 \vfill
 
-\begin{flushleft}
-The student author, whose presentation of the scholarship herein was approved by the program of study committee, is solely responsible for the content of this creative component. The Graduate College will ensure this creative component is globally accessible and will not permit alterations after a degree is conferred.
-\end{flushleft}
+The student author, whose presentation of the scholarship herein was approved by the academic plan committee, is solely responsible for the content of this creative component. The Graduate College will ensure this creative component is globally accessible and will not permit alterations after a degree is conferred.
 
 \vfill
 
@@ -92,7 +99,7 @@ Ames, Iowa\\
 
 \vspace{0.5in}
 
-Copyright © James Joseph, 2026. All rights reserved.
+This work is licensed under CC BY 3.0 US, by James Joseph, 2026
 
 \end{center}
 \end{titlepage}
@@ -354,7 +361,7 @@ Starting with the serial probing, properly fenced timing, and one line eviction 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{SFV-1}
+    \includegraphics[alt={Box and whisker for all sets showing clustering around 130-140 cycles with inconsistent quartiles and ranges}, width=\columnwidth]{SFV-1}
     \caption{Box and whisker for all sets}
     \label{fig:SFV-1}
 \end{figure}
@@ -406,7 +413,7 @@ The main take away from this experiment was that the cycles greatly decreased, b
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{SPV-1}
+    \includegraphics[alt={Box and whisker for all sets showing clustering around 60 cycles with slightly more consistency}, width=\columnwidth]{SPV-1}
     \caption{Serial, Pipelined, Victim trial for all sets}
     \label{fig:SPV-1}
 \end{figure}
@@ -455,7 +462,7 @@ With the introduction of parallel probing, clearer patterns emerge. There are tw
 %Consistent lines
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN0-1}
+    \includegraphics[alt={Scatter plot showing two distinct, horizontal lines},width=\columnwidth]{PFN0-1}
     \caption{Scatter plot showing two distinct lines}
     \label{fig:PFN0-1}
 \end{figure}
@@ -465,7 +472,7 @@ The outliers common in this graph and many other experiment's graphs are discuss
 %Single run
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN0-2}
+    \includegraphics[alt={Scatter plot for a single run}, width=\columnwidth]{PFN0-2}
     \caption{Scatter plot for a single run}
     \label{fig:PFN0-2}
 \end{figure}
@@ -475,7 +482,7 @@ This graph represents a single run to show the consistency of each line along wi
 %Fencing
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN0-3}
+    \includegraphics[alt={Scatter plot showing baseline with parallel lines around spikes}, width=\columnwidth]{PFN0-3}
     \caption{Scatter plot showing baseline with parallel lines around spikes}
     \label{fig:PFN0-3}
 \end{figure}
@@ -488,7 +495,7 @@ Sadly, each program that was run simultaneously did not have much impact on the 
 % Set 0
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFV0-1}
+    \includegraphics[alt={Scatter plot showing consistent set 0 results}, width=\columnwidth]{PFV0-1}
     \caption{Scatter plot showing consistent set 0 results}
     \label{fig:PFV0-1}
 \end{figure}
@@ -496,7 +503,7 @@ Sadly, each program that was run simultaneously did not have much impact on the 
 % Individual
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFV0-2}
+    \includegraphics[alt={Scatter plot showing similar individual pattern}, width=\columnwidth]{PFV0-2}
     \caption{Scatter plot showing similar individual pattern}
     \label{fig:PFV0-2}
 \end{figure}
@@ -504,7 +511,7 @@ Sadly, each program that was run simultaneously did not have much impact on the 
 % Lower baseline
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFV0-3}
+    \includegraphics[alt={Scatter plot showing similar parallel lines with baseline}, width=\columnwidth]{PFV0-3}
     \caption{Scatter plot showing similar parallel lines with baseline}
     \label{fig:PFV0-3}
 \end{figure}
@@ -515,7 +522,7 @@ As with the victim function, pwd and Phoronix gave much the same story in spite 
 % Low baseline
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFP0-1}
+    \includegraphics[alt={Scatter plot showing the same lower baseline pattern}, width=\columnwidth]{PFP0-1}
     \caption{Scatter plot showing the same lower baseline pattern}
     \label{fig:PFP0-1}
 \end{figure}
@@ -526,7 +533,7 @@ When switching to a pipeline approach for the timing, the same patterns go away.
 % Cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PPN0-1}
+    \includegraphics[alt={Scatter plot showing cloud around 60 cycles}, width=\columnwidth]{PPN0-1}
     \caption{Scatter plot showing cloud around 60 cycles}
     \label{fig:PPN0-1}
 \end{figure}
@@ -539,7 +546,7 @@ Note: when evaluating these graphs, the x axis has increased 2 orders of magnitu
 % Messy lines
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN1-1}
+    \includegraphics[alt={Scatter plot showing messy lines}, width=\columnwidth]{PFN1-1}
     \caption{Scatter plot showing messy lines}
     \label{fig:PFN1-1}
 \end{figure}
@@ -547,7 +554,7 @@ Note: when evaluating these graphs, the x axis has increased 2 orders of magnitu
 % Different line levels
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN1-2}
+    \includegraphics[alt={Scatter plot showing lines at different levels}, width=\columnwidth]{PFN1-2}
     \caption{Scatter plot showing lines at different levels}
     \label{fig:PFN1-2}
 \end{figure}
@@ -555,7 +562,7 @@ Note: when evaluating these graphs, the x axis has increased 2 orders of magnitu
 % Spikes
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN1-2}
+    \includegraphics[alt={Scatter plot showing spikes above the lines}, width=\columnwidth]{PFN1-2}
     \caption{Scatter plot showing spikes above the lines}
     \label{fig:PFN1-2}
 \end{figure}
@@ -568,7 +575,7 @@ The pipelined timing version offers an interesting difference with the window. T
 % Baseline w/ cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PPN1-1}
+    \includegraphics[alt={Scatter plot showing 15 cycle baseline with 60 cycle cloud}, width=\columnwidth]{PPN1-1}
     \caption{Scatter plot showing 15 cycle baseline with 60 cycle cloud}
     \label{fig:PPN1-1}
 \end{figure}
@@ -578,7 +585,7 @@ This isn't true for all sets, however. Some sets had much more sparse or no clou
 % Baseline w/o cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PPN1-2}
+    \includegraphics[alt={Scatter plot showing 15 cycle baseline without 60 cycle cloud}, width=\columnwidth]{PPN1-2}
     \caption{Scatter plot showing 15 cycle baseline without 60 cycle cloud}
     \label{fig:PPN1-2}
 \end{figure}
@@ -589,7 +596,7 @@ When increasing the window to 100ns for the fenced timing, much of the same patt
 % One line
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN100-1}
+    \includegraphics[alt={Scatter plot showing one line}, width=\columnwidth]{PFN100-1}
     \caption{Scatter plot showing one line}
     \label{fig:PFN100-1}
 \end{figure}
@@ -597,7 +604,7 @@ When increasing the window to 100ns for the fenced timing, much of the same patt
 % Two line
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN100-2}
+    \includegraphics[alt={Scatter plot showing similar parallel lines}, width=\columnwidth]{PFN100-2}
     \caption{Scatter plot showing similar parallel lines}
     \label{fig:PFN100-2}
 \end{figure}
@@ -605,7 +612,7 @@ When increasing the window to 100ns for the fenced timing, much of the same patt
 % Two line w/ cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PFN100-3}
+    \includegraphics[alt={Scatter plot showing two lines with cloud}, width=\columnwidth]{PFN100-3}
     \caption{Scatter plot showing two lines with cloud}
     \label{fig:PFN100-3}
 \end{figure}
@@ -616,7 +623,7 @@ As with the fenced version, the pipelined version has very similar clouds to its
 % Baseline w/ cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PPN100-1}
+    \includegraphics[alt={Scatter plot showing 25 cycle baselne with more pronounced cloud}, width=\columnwidth]{PPN100-1}
     \caption{Scatter plot showing 25 cycle baselne with more pronounced cloud}
     \label{fig:PPN100-1}
 \end{figure}
@@ -624,7 +631,7 @@ As with the fenced version, the pipelined version has very similar clouds to its
 % Baseline w/o cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{PPN100-2}
+    \includegraphics[alt={Scatter plot showing 25 cycle baselne without clouds}, width=\columnwidth]{PPN100-2}
     \caption{Scatter plot showing 25 cycle baselne without clouds}
     \label{fig:PPN100-2}
 \end{figure}
