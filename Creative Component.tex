@@ -129,7 +129,7 @@ Once the cache is filled, if a new line needs to get added, it will evict one of
 
 \subsection{Prime+Probe}
 Prime+Probe consists of three phases:
-\noindent\begin{enumerate}[leftmargin=*]
+\noindent\begin{enumerate}
     \item \textbf{Prime:} Fill cache sets with attacker data
     \item \textbf{Victim Execution:} Victim accesses memory
     \item \textbf{Probe:} Measure access time to detect evictions
@@ -181,19 +181,19 @@ This paper aims to capture the cache behavior of another program running on the 
 \section{Methodology}
 
 \subsection{Experimental Setup}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
     \item CPU: Intel\textsuperscript{\tiny\textregistered} Xeon\textsuperscript{\tiny\textregistered} Gold 5218 CPU @ 2.30GHz
     \item Cache sizes:
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item L1D:
-        \begin{itemize}[leftmargin=*]
+        \begin{itemize}
             \item 32 KiB/core
             \item 64B line
             \item 8-way associative
             \item 64 sets
         \end{itemize}
         \item L2:
-        \begin{itemize}[leftmargin=*]
+        \begin{itemize}
             \item 1 MiB/core
             \item 64B line
             \item 16-way associative
@@ -213,21 +213,21 @@ The scalar Prime+Probe program this project used as a baseline was created by De
 
 \subsubsection{Vectorized Prime+Probe}
 During the project, multiple PoCs were developed:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
     \item avx\_cache\_fill\_with\_time.asm
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Consistently calls and times \texttt{vpgatherqq} on 8 addresses 0x1000 bytes apart while logging anomalies (> 30 cycles)
     \end{itemize}
     \item avx\_cache\_fill\_with\_time\_avx2.asm
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Modification of \emph{avx\_cache\_fill\_with\_time.asm} to use AVX2 \texttt{vpgatherdd}
     \end{itemize}
     \item ping\_memory.c
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Spins off a process that accesses memory every set time while running \emph{avx\_cache\_fill\_with\_time.asm}
     \end{itemize}
     \item Prime-Probe.c
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Modification of Dipta's scalar Prime+Probe program to use vector instructions and enable a variety of tests
     \end{itemize}
 \end{itemize}
@@ -249,7 +249,7 @@ For the purposes of Prime+Probe on the chip that was used, \texttt{vpgatherqq} (
 
 \subsection{Tuned Variables}\label{sec:tuned-variables}
 To explore the different ways vector instructions affect the Prime+Probe attack, there were multiple knobs and dials turned between runs. This changes how impactful different underlying CPU optimizations were to the timings, and while several different variables were considered and trialed, the most impactful/interesting ones were found to be:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
     \item Parallel vs. serial timing
     \item Fencing vs. pipelining timings
     \item Timing window
@@ -330,23 +330,23 @@ The window is a technique sometimes used with parallel Prime+Probe timing to giv
 
 \subsubsection{Payload}
 During testing, multiple payloads were used, but 4 became the most representative of different cases that would show readable patterns in the data:
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
     \item Nothing
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Run nothing to get a baseline for the experimentation code
     \end{itemize}
     \item Original victim function
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item serial: Access one line in the set to analyze isolated impact
         \item parallel: Access one line in the set every x nanoseconds to see spikes
     \end{itemize}
     \item pwd command
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Shows how a real, small program adds patterns and noise for data
         \item Takes about the same time as 1000 samples in parallel
     \end{itemize}
     \item phoronix pass/fail
-    \begin{itemize}[leftmargin=*]
+    \begin{itemize}
         \item Use real benchmarking software to see how samples reacted
     \end{itemize}
 \end{itemize}
@@ -361,7 +361,7 @@ Starting with the serial probing, properly fenced timing, and one line eviction 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Box and whisker for all sets showing clustering around 130-140 cycles with inconsistent quartiles and ranges}, width=\columnwidth]{SFV-1}
+    \includegraphics[alt={Box plot of cycle delta versus cache set for the Serial, Fenced, Victim experiment, showing values clustered near 130 to 140 cycles with inconsistent quartile ranges}, width=\columnwidth]{SFV-1}
     \caption{Box and whisker for all sets}
     \label{fig:SFV-1}
 \end{figure}
@@ -413,7 +413,7 @@ The main take away from this experiment was that the cycles greatly decreased, b
 
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Box and whisker for all sets showing clustering around 60 cycles with slightly more consistency}, width=\columnwidth]{SPV-1}
+    \includegraphics[alt={Box plot of cycle delta versus cache set for the Serial, Pipelined, Victim experiment, showing tighter clustering around 60 cycles and more consistent quartile ranges}, width=\columnwidth]{SPV-1}
     \caption{Serial, Pipelined, Victim trial for all sets}
     \label{fig:SPV-1}
 \end{figure}
@@ -462,7 +462,7 @@ With the introduction of parallel probing, clearer patterns emerge. There are tw
 %Consistent lines
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing two distinct, horizontal lines},width=\columnwidth]{PFN0-1}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, No Window experiment, showing two distinct horizontal clusters separated by about 10 cycles},width=\columnwidth]{PFN0-1}
     \caption{Scatter plot showing two distinct lines}
     \label{fig:PFN0-1}
 \end{figure}
@@ -472,7 +472,7 @@ The outliers common in this graph and many other experiment's graphs are discuss
 %Single run
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot for a single run}, width=\columnwidth]{PFN0-2}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for a single run in the Parallel, Fenced, None, No Window experiment, showing a stable lower cluster and isolated higher outliers}, width=\columnwidth]{PFN0-2}
     \caption{Scatter plot for a single run}
     \label{fig:PFN0-2}
 \end{figure}
@@ -482,7 +482,7 @@ This graph represents a single run to show the consistency of each line along wi
 %Fencing
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing baseline with parallel lines around spikes}, width=\columnwidth]{PFN0-3}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, No Window experiment, showing a dense baseline cluster with higher parallel bands emerging near timing spikes}, width=\columnwidth]{PFN0-3}
     \caption{Scatter plot showing baseline with parallel lines around spikes}
     \label{fig:PFN0-3}
 \end{figure}
@@ -495,7 +495,7 @@ Sadly, each program that was run simultaneously did not have much impact on the 
 % Set 0
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing consistent set 0 results}, width=\columnwidth]{PFV0-1}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for cache set 0 in the Parallel, Fenced, Victim, No Window experiment, showing a consistent lower cluster and occasional higher points}, width=\columnwidth]{PFV0-1}
     \caption{Scatter plot showing consistent set 0 results}
     \label{fig:PFV0-1}
 \end{figure}
@@ -503,7 +503,7 @@ Sadly, each program that was run simultaneously did not have much impact on the 
 % Individual
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing similar individual pattern}, width=\columnwidth]{PFV0-2}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, Victim, No Window experiment, showing repeated clustered points from a single run}, width=\columnwidth]{PFV0-2}
     \caption{Scatter plot showing similar individual pattern}
     \label{fig:PFV0-2}
 \end{figure}
@@ -511,7 +511,7 @@ Sadly, each program that was run simultaneously did not have much impact on the 
 % Lower baseline
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing similar parallel lines with baseline}, width=\columnwidth]{PFV0-3}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, Victim, No Window experiment, showing parallel bands of points above a stable baseline}, width=\columnwidth]{PFV0-3}
     \caption{Scatter plot showing similar parallel lines with baseline}
     \label{fig:PFV0-3}
 \end{figure}
@@ -522,7 +522,7 @@ As with the victim function, pwd and Phoronix gave much the same story in spite 
 % Low baseline
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing the same lower baseline pattern}, width=\columnwidth]{PFP0-1}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, pwd, No Window experiment, showing a lower baseline band with occasional higher timing clusters}, width=\columnwidth]{PFP0-1}
     \caption{Scatter plot showing the same lower baseline pattern}
     \label{fig:PFP0-1}
 \end{figure}
@@ -533,7 +533,7 @@ When switching to a pipeline approach for the timing, the same patterns go away.
 % Cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing cloud around 60 cycles}, width=\columnwidth]{PPN0-1}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Pipelined, None, No Window experiment, showing a diffuse cloud of points centered near 60 cycles with no strong line structure}, width=\columnwidth]{PPN0-1}
     \caption{Scatter plot showing cloud around 60 cycles}
     \label{fig:PPN0-1}
 \end{figure}
@@ -546,7 +546,7 @@ Note: when evaluating these graphs, the x axis has increased 2 orders of magnitu
 % Messy lines
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing messy lines}, width=\columnwidth]{PFN1-1}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, 1ns Window experiment, showing noisy, irregular point groupings with blurred line structure}, width=\columnwidth]{PFN1-1}
     \caption{Scatter plot showing messy lines}
     \label{fig:PFN1-1}
 \end{figure}
@@ -554,7 +554,7 @@ Note: when evaluating these graphs, the x axis has increased 2 orders of magnitu
 % Different line levels
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing lines at different levels}, width=\columnwidth]{PFN1-2}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, 1ns Window experiment, showing several horizontal levels of points at different timing bands}, width=\columnwidth]{PFN1-2}
     \caption{Scatter plot showing lines at different levels}
     \label{fig:PFN1-2}
 \end{figure}
@@ -562,9 +562,9 @@ Note: when evaluating these graphs, the x axis has increased 2 orders of magnitu
 % Spikes
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing spikes above the lines}, width=\columnwidth]{PFN1-2}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, 1ns Window experiment, showing spikes of points rising above baseline clusters}, width=\columnwidth]{PFN1-3}
     \caption{Scatter plot showing spikes above the lines}
-    \label{fig:PFN1-2}
+    \label{fig:PFN1-3}
 \end{figure}
 
 When looking at the spikes in this graph, the appear to be taller and further apart compared to the previous ones. 11, 14, 22, 25, 27, and 48 were the only sets that showed any amount of spikes. Most just ended up in the noise, and even the rest of that group has very small spikes in comparison to 25.
@@ -575,8 +575,8 @@ The pipelined timing version offers an interesting difference with the window. T
 % Baseline w/ cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing 15 cycle baseline with 60 cycle cloud}, width=\columnwidth]{PPN1-1}
-    \caption{Scatter plot showing 15 cycle baseline with 60 cycle cloud}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Pipelined, None, 1ns Window experiment, showing a lower baseline near 25 cycles and a sparser cloud around 60 cycles}, width=\columnwidth]{PPN1-1}
+    \caption{Scatter plot showing 25 cycle baseline with 60 cycle cloud}
     \label{fig:PPN1-1}
 \end{figure}
 
@@ -585,8 +585,8 @@ This isn't true for all sets, however. Some sets had much more sparse or no clou
 % Baseline w/o cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing 15 cycle baseline without 60 cycle cloud}, width=\columnwidth]{PPN1-2}
-    \caption{Scatter plot showing 15 cycle baseline without 60 cycle cloud}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Pipelined, None, 1ns Window experiment, showing a single lower baseline near 25 cycles without a higher cloud}, width=\columnwidth]{PPN1-2}
+    \caption{Scatter plot showing 25 cycle baseline without 60 cycle cloud}
     \label{fig:PPN1-2}
 \end{figure}
 
@@ -596,7 +596,7 @@ When increasing the window to 100ns for the fenced timing, much of the same patt
 % One line
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing one line}, width=\columnwidth]{PFN100-1}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, 100ns Window experiment, showing a dense single line of points with little vertical spread}, width=\columnwidth]{PFN100-1}
     \caption{Scatter plot showing one line}
     \label{fig:PFN100-1}
 \end{figure}
@@ -604,7 +604,7 @@ When increasing the window to 100ns for the fenced timing, much of the same patt
 % Two line
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing similar parallel lines}, width=\columnwidth]{PFN100-2}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, 100ns Window experiment, showing two parallel bands of points across the x-axis}, width=\columnwidth]{PFN100-2}
     \caption{Scatter plot showing similar parallel lines}
     \label{fig:PFN100-2}
 \end{figure}
@@ -612,7 +612,7 @@ When increasing the window to 100ns for the fenced timing, much of the same patt
 % Two line w/ cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing two lines with cloud}, width=\columnwidth]{PFN100-3}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Fenced, None, 100ns Window experiment, showing two parallel bands plus a wider cloud of points around them}, width=\columnwidth]{PFN100-3}
     \caption{Scatter plot showing two lines with cloud}
     \label{fig:PFN100-3}
 \end{figure}
@@ -623,16 +623,16 @@ As with the fenced version, the pipelined version has very similar clouds to its
 % Baseline w/ cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing 25 cycle baselne with more pronounced cloud}, width=\columnwidth]{PPN100-1}
-    \caption{Scatter plot showing 25 cycle baselne with more pronounced cloud}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Pipelined, None, 100ns Window experiment, showing a lower baseline around 25 cycles with a pronounced upper cloud of points}, width=\columnwidth]{PPN100-1}
+    \caption{Scatter plot showing 25 cycle baseline with more pronounced cloud}
     \label{fig:PPN100-1}
 \end{figure}
 
 % Baseline w/o cloud
 \begin{figure}[H]
     \centering
-    \includegraphics[alt={Scatter plot showing 25 cycle baselne without clouds}, width=\columnwidth]{PPN100-2}
-    \caption{Scatter plot showing 25 cycle baselne without clouds}
+    \includegraphics[alt={Scatter plot of cycle delta on the y-axis versus cycle number difference from first entry on the x-axis for the Parallel, Pipelined, None, 100ns Window experiment, showing a lower baseline around 25 cycles with minimal secondary cloud activity}, width=\columnwidth]{PPN100-2}
+    \caption{Scatter plot showing 25 cycle baseline without clouds}
     \label{fig:PPN100-2}
 \end{figure}
 
@@ -660,7 +660,7 @@ The rest of the data appeared to coalesce around 3 distinct levels that were eac
 Finally, it's worth noting that there was a consistent lack of notable data in the sets right below 16 and 32 with set 0 having the most consistent show of patterns. This is likely because the addressing for the L1D cache takes fewer bytes then are affected by ASLR, so aligned, larger data structures will consistently use lower sets. For example, a program allocates 1KiB of data aligned to 1KiB. That data either starts in set 0, 16, 32, or 48, and any unused data would likely be around set 15, 31, 47, or 63. This was most noticeable in the 100ns window.
 
 \section{Limitations}
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
     \item Results may be hardware-specific
     \item Limited instruction sets evaluated
     \item Noise in timing measurements
